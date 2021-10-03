@@ -4,7 +4,6 @@ pragma solidity ^0.8.2;
 // -------------
 // FANCY BEE DAO
 // -------------
-
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract FancyBsDAO is Ownable {
@@ -15,32 +14,29 @@ contract FancyBsDAO is Ownable {
     }
         
     mapping (address=> hive) public hiveMap;
-
     uint public treasury;
-    
     BeeNFT public beeNFT; 
     HiveNFT public hiveNFT; 
     FancyBsGov public votingToken;
     FancyBsGovenor public governor; 
     
-    constructor(){
-        
+    constructor(){       
         beeNFT = new BeeNFT();
         hiveNFT = new HiveNFT();
         votingToken = new FancyBsGov();
-        governor = new FancyBsGovenor(votingToken);
-        
-        changeOwners( msg.sender);
-        
+        governor = new FancyBsGovenor(votingToken);     
+        changeOwners( msg.sender);    // Make sure that the owner reall owns them.
 
     }
     
+    // Allow the owners to be changed.
     function changeOwners(address _newOwner) public onlyOwner {
         beeNFT.transferOwnership(_newOwner);
         hiveNFT.transferOwnership(_newOwner);
         votingToken.transferOwnership(_newOwner);
     }
-        
+    
+    // Receive  payments here
     receive() external payable {
         treasury += msg.value;
     }
@@ -60,15 +56,11 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 contract BeeNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Ownable, ERC721Burnable {
-    
     address creater = msg.sender;
-    
     using Counters for Counters.Counter;
-
     Counters.Counter private _tokenIdCounter;
 
     constructor() ERC721("FancyBee", "FBEE") {}
-    
     //TODO - register for ERC-1820
     function royaltyInfo(uint256 _tokenId, uint256 _price) external view returns (address receiver, uint256 amount){
         require (_tokenId>0, "TokenID out of range");
@@ -123,7 +115,6 @@ contract BeeNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Ownable
     {
         return super.supportsInterface(interfaceId);
     }
-
 }
 
 // --------------
@@ -136,15 +127,11 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-contract HiveNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Ownable, ERC721Burnable {    
-    
+contract HiveNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Ownable, ERC721Burnable {       
     address creater = msg.sender;
-  
     using Counters for Counters.Counter;
-
     Counters.Counter private _tokenIdCounter;
 
     constructor() ERC721("FancyHive", "FBHV") {}
@@ -263,8 +250,6 @@ contract FancyBsGov is ERC20, ERC20Burnable, ERC20Snapshot, Ownable, ERC20Permit
 // -------------------------
 // FANCY BEE VOTING GOVERNOR
 // -------------------------
-
-
 import "@openzeppelin/contracts/governance/Governor.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
